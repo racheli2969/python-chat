@@ -1,0 +1,42 @@
+import socket
+import sys
+import select
+
+# Specify the server's host and port
+host = 'localhost'
+port = 8080
+
+# Create a client socket
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+try:
+    # Connect to the server
+    client_socket.connect((host, port))
+    print('Connected to the server')
+
+    while True:
+        # Use select to monitor input from the keyboard and incoming messages from the server
+        rlist, _, _ = select.select([sys.stdin, client_socket], [], [])
+
+        for sock in rlist:
+            # Incoming message from the server
+            if sock == client_socket:
+                data = sock.recv(1024).decode()
+                if not data:
+                    # Server has closed the connection
+                    print('Disconnected from the server')
+                    client_socket.close()
+                    sys.exit()
+                else:
+                    print(f'Message from the server: {data}')
+
+            # Input from the keyboard
+            else:
+                message = sys.stdin.readline().strip()
+                client_socket.send(message.encode())
+
+except KeyboardInterrupt:
+    # Interrupted by the user
+    print('Bye!')
+    client_socket.close()
+    sys.exit()
