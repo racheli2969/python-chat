@@ -5,7 +5,7 @@
 
 import select
 import socket
-import protocol
+import utils.protocol as protocol
 
 clients = {}
 
